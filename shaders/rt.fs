@@ -6,6 +6,12 @@ in vec4 fragColor;
 out vec4 finalColor;
 
 uniform vec2 resolution;
+uniform int antiAliasing;
+
+// FIXME: This may be slow
+float rand(vec2 co){
+    return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453);
+}
 
 struct Sphere {
     vec3 center;
@@ -116,8 +122,15 @@ void main() {
     vec3 vertical = vec3(0.0, viewport_height, 0.0);
     vec3 lower_left_corner = origin - horizontal/2.0 - vertical/2.0 - vec3(0.0,0.0,focal_lenght);
 
-    vec2 uv = gl_FragCoord.xy/resolution;
-    Ray r = Ray(origin, lower_left_corner + uv.x*horizontal + uv.y*vertical - origin);
+    vec4 color = vec4(0);
+    vec2 uv = vec2(0);
 
-    finalColor = ray_color(r);
+    for (int i=0;i<antiAliasing;i++) {
+        uv = (gl_FragCoord.xy+vec2(rand(uv), rand(uv)))/resolution;
+        Ray r = Ray(origin, lower_left_corner + uv.x*horizontal + uv.y*vertical - origin);
+
+        color += ray_color(r);
+    }
+
+    finalColor = color/float(antiAliasing);
 }

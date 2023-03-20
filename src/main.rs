@@ -1,8 +1,8 @@
 use raylib::prelude::*;
 
 const MAX_SPHERES: usize = 20;
+const AntiAliasing: i32 = 100;
 
-#[repr(C)]
 #[derive(Clone, Copy)]
 struct Sphere {
     center: [f32; 3],
@@ -85,6 +85,9 @@ fn main() {
 
     let resolution = [800.0, 800.0];
     shader.set_shader_value(resolution_loc, resolution);
+
+    let aa_loc = shader.get_shader_location("antiAliasing");
+    shader.set_shader_value(aa_loc, AntiAliasing);
 
     let mut spheres = Spheres::new(&mut shader);
     spheres.set_spheres(&mut shader).unwrap();
