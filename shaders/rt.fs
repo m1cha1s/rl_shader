@@ -13,6 +13,18 @@ float rand(vec2 co){
     return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453);
 }
 
+vec3 random_vec3(vec2 uv) {
+    return vec3(rand(uv), rand(uv), rand(uv));
+}
+
+vec3 random_in_unit_sphere(vec2 uv) {
+    while (true) {
+        vec3 p = random_vec3(uv);
+        if (dot(p, p) >= 1) { continue; }
+        return p;
+    }
+}
+
 struct Sphere {
     vec3 center;
     float radius;
@@ -103,7 +115,8 @@ HitRecord hit_spheres(Ray r, float t_min, float t_max) {
 vec4 ray_color(Ray r) {
     HitRecord rec = hit_spheres(r, 0, 99999999);
     if(rec.hit) {
-        return vec4(0.5*(rec.normal + vec3(1)), 1);
+        vec3 target = rec.p + rec.normal + random_in_unit_sphere(gl_FragCoord.xy);
+        return vec4((0.5*ray_color(Ray(rec.p, target-rec.p))).xyz, 1);
     }
     vec3 unit_direction = normalize(r.direction);
     float t = 0.5 * (unit_direction.y + 1.0);
